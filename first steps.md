@@ -3,14 +3,12 @@ Title: First steps analysing selection in Lynx
 Author: Lorena Lorenzo Fernández
 Date: 25 January, 2021
 ---
-##Creating a folder in the terminal
-
+## Creating a folder in the terminal
 ```
 mkdir vcf
 ls
 scp ebazzicalupo@genomics-a.ebd.csic.es:/home/ebazzicalupo/LC_LR/CatRef_vcfs/lc_cat_ref.filter5.vcf .
 
-ebazzicalupo@genomics-a.ebd.csic.es's password:
 lc_cat_ref.filter5.vcf                                                  
 grep "#" lc_cat_ref.filter5.vcf > prueba
 grep -v "#" lc_cat_ref.filter5.vcf | head -10000 >> prueba
