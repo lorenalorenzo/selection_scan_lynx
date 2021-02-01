@@ -40,7 +40,8 @@ library(rehh)
 trial1<- data2haplohh(hap_file= "prueba_noac0.vcf", polarize_vcf= FALSE, vcf_reader= "vcfR")
 ```
 OUTPUT
-* Reading input file(s) *
+* Reading input file(s)
+
 Using package 'vcfR' to read vcf.
 Extracting map information.
 Scanning file to determine attributes.
@@ -66,7 +67,8 @@ Haploid Diploid Triploid, ... :
 1 2
 0 20
 No marker identifiers found in vcf file.
-* Filtering data *
+* Filtering data
+
 Discard markers genotyped on less than 100 % of haplotypes.
 517 markers discarded.
 1783 markers remaining.
@@ -81,5 +83,5 @@ ihs<- ihh2ihs(scan, freqbin= 1)
 
 plot<- freqbinplot(ihs)
 plot_ihs<-distribplot(ihs$ihs$IHS, xlab="iHS")
-
-dev.print(postscript,file="distribution.ihs")
+manhattanplot(ihs)
+manhattanplot(ihs, pval=TRUE, main= "p-value of iHs in chr A1")
