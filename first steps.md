@@ -78,3 +78,8 @@ Number of mono-, bi-, multi-allelic markers:
 ```
 scan<- scan_hh(trial1, polarized= FALSE)
 ihs<- ihh2ihs(scan, freqbin= 1)
+
+plot<- freqbinplot(ihs)
+plot_ihs<-distribplot(ihs$ihs$IHS, xlab="iHS")
+
+dev.print(postscript,file="distribution.ihs")
