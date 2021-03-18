@@ -37,15 +37,16 @@ grep -v "#" allsamples_cat_ref.filter5.vcf | less -S
 ```
 
 # Number of variants with ExcessHet annotated:
-FUNCIONA:
-grep -v "#" allsamples_cat_ref.filter5.vcf | grep -o -E 'ExcessHet=[[:digit:]]{1,4}\.?[[:digit:]]{0,4}' | wc -l
-
+FUNCIONA, he elegido hasta el 8 para coger todos los valores de excesshet.
+grep -v "#" allsamples_cat_ref.filter5.vcf | grep -o -E 'ExcessHet=[[:digit:]]{1,8}\.?[[:digit:]]{0,8}' | wc -l
+grep -v "#" allsamples_cat_ref.filter5.vcf | head -n100000 > prueba_excesshet.vcf
+grep -v "#" prueba_excesshet.vcf | grep -o -E 'ExcessHet=[[:digit:]]{1,8}\.?[[:digit:]]{0,8}' > excesshet_dist.vcf
 
 DANI:
 grep -v '#' tu_archivo.vcf | awk -F";" '{printf ("%s;%s\n", $5,$7)}' | column -t | less -S
-
+grep -v "#" allsamples_cat_ref.filter5.vcf | grep -o -E 'ExcessHet=[[:digit:]]{1,3}\.?[[:digit:]]{0,3}' | cut -d '=' -f2 > ExcessHet.table
 
 # Extract column:
-grep -v "#" allsamples_cat_ref.filter5.vcf | grep -o -E 'ExcessHet=[[:digit:]]{1,3}\.?[[:digit:]]{0,3}' | cut -d '=' -f2 > ExcessHet.table
+
 
 #Distribution plot of ExcessHet in R
