@@ -29,7 +29,8 @@ The number of het genotypes expected under Hardy-Weinberg equilibrium is 2*(# of
 The output is the inbreeding coefficient 'F' (fixation) statistic, which for large sample sizes converges to the probability that an individual's two alleles are identical by descent, provided that cosanguinity is the only source of deviation from Hardy-Weinberg equilibrium.
 
 ### (8) Excess Het
-ExcessHet describes the heterozygosity of the called samples, giving a probability of excess heterozygosity being observed
+ExcessHet describes the heterozygosity of the called samples, giving a probability of excess heterozygosity being observed. To analyze this, we first need to separate the vcf per species.
+
 
 #See the distribution of Excess Het by analysing vcf first
 ```
@@ -37,14 +38,20 @@ grep -v "#" allsamples_cat_ref.filter5.vcf | less -S
 ```
 
 # Number of variants with ExcessHet annotated:
-FUNCIONA, he elegido hasta el 8 para coger todos los valores de excesshet.
-grep -v "#" allsamples_cat_ref.filter5.vcf | grep -o -E 'ExcessHet=[[:digit:]]{1,8}\.?[[:digit:]]{0,8}' | wc -l
-grep -v "#" allsamples_cat_ref.filter5.vcf | head -n100000 > prueba_excesshet.vcf
-grep -v "#" prueba_excesshet.vcf | grep -o -E 'ExcessHet=[[:digit:]]{1,8}\.?[[:digit:]]{0,8}' > excesshet_dist.vcf
-
-DANI:
-grep -v '#' tu_archivo.vcf | awk -F";" '{printf ("%s;%s\n", $5,$7)}' | column -t | less -S
-grep -v "#" allsamples_cat_ref.filter5.vcf | grep -o -E 'ExcessHet=[[:digit:]]{1,3}\.?[[:digit:]]{0,3}' | cut -d '=' -f2 > ExcessHet.table
+In order to know if ExcessHet is a variable present in every variant, we search for it and compare the number of lines in the original vcf with the number of lines with info about ExcessHet.
+*Note that I decided that every ExcessHet value will be between 1-8 digits (ordinals and decimals) and that I typed \-? at the start due to some -0 values of ExcessHet in the vcf.
+```
+grep -v "#" allsamples_cat_ref.filter5.vcf | grep -o -E 'ExcessHet=\-?[[:digit:]]{1,8}\.?[[:digit:]]{0,8}' | wc -l
+grep "ExcessHet" allsamples_cat_ref.filter5.vcf | wc -l
+```
+After this, I made a subset of 100000 variants to test the filter steps.
+```
+grep -v "#" allsamples_cat_ref.filter5.vcf | head -n100000 > filtering_100000.vcf
+```
+Then, I extract every ExcessHet value in a new vcf.
+```
+grep -o -E "ExcessHet=\-?[[:digit:]]{1,8}\.?[[:digit:]]{0,8}" prueba_excesshet.vcf  > excesshet_100000.vcf
+```
 
 # Extract column:
 
