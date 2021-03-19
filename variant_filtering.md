@@ -5,7 +5,7 @@ Date: 11 March, 2021
 ---
 # VARIANT FILTERING
 Once we have our genotypes called, we want to filter the SNPs in order to get better information.
-The first 5 steps of this filters are extensively explain in Enrico's Github:
+The first 5 steps of this filters are extensively explained in Enrico's Github:
 https://github.com/Enricobazzi/PlanNacional_Demographic_models_Oscar/blob/master/2.Variant_Filtering.md
 
 ## Workflow
