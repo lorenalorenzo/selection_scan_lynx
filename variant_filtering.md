@@ -52,8 +52,15 @@ Then, I extract every ExcessHet value in a new vcf.
 ```
 grep -o -E "ExcessHet=\-?[[:digit:]]{1,8}\.?[[:digit:]]{0,8}" prueba_excesshet.vcf  > excesshet_100000.vcf
 ```
+With this, I obtain a vcf with this info:
+ExcessHet=[value]
 
-# Extract column:
-
-
-#Distribution plot of ExcessHet in R
+In order to get every [value] separated from the "ExcessHet" word, I have to interpret "=" as a delimiter:
+```
+cat excesshet_100000.vcf | tr '=' '\t' > excesshet_toR.vcf
+```
+This vcf is what I want to use in R to study the distribution. So, to make it easier, I am going to download this vcf in my laptop (in C:\Users\loren)
+```
+scp llorenzo@genomics-a.ebd.csic.es:/home/llorenzo/vcf/excesshet_toR.vcf .
+```
+# Distribution plot of ExcessHet in R
