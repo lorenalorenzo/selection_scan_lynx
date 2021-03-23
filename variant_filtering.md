@@ -64,3 +64,46 @@ This vcf is what I want to use in R to study the distribution. So, to make it ea
 scp llorenzo@genomics-a.ebd.csic.es:/home/llorenzo/vcf/excesshet_toR.vcf .
 ```
 # Distribution plot of ExcessHet in R
+ExcessHet is the phred-scaled p-value for the test of heterozygosity. The phred-score is:
+Phred-score= -10 * log10 (p-value)
+So values of ExcessHet above 13 have a p-value smaller than 0.05.
+
+IN GATK FILTERING I FOUND:
+A] Hard-filter a large cohort callset on ExcessHet using VariantFiltration
+ExcessHet filtering applies only to callsets with a large number of samples, e.g. hundreds of unrelated samples. Small cohorts should not trigger ExcessHet filtering as values should remain small. Note cohorts of consanguinous samples will inflate ExcessHet, and it is possible to limit the annotation to founders for such cohorts by providing a pedigree file during variant calling.
+
+```
+gatk --java-options "-Xmx3g -Xms3g" VariantFiltration \
+    -V cohort.vcf.gz \
+    --filter-expression "ExcessHet > 54.69" \
+    --filter-name ExcessHet \
+    -O cohort_excesshet.vcf.gz
+```
+
+This produces a VCF callset where any record with ExcessHet greater than 54.69 is filtered with the ExcessHet label in the FILTER column. The phred-scaled 54.69 corresponds to a z-score of -4.5. If a record lacks the ExcessHet annotation, it will pass filters.
+
+Given that information, I studied the distribution of ExcessHet for the subset of 100000 variants.
+
+{R}
+```
+#Upload data and packages needed for plotting
+library(ggplot2)
+excesshet <- read.table ("excesshet_toR.vcf")
+
+#Plot the subset distribution
+subset_dist <- ggplot(data=excesshet, aes(x=V2), title("ExcessHet outliers distribution")) +
+  geom_histogram(binwidth= 5, colour="black", fill="white") +
+  scale_y_continuous(limit=c(0,70000)) +
+  scale_x_continuous(breaks=c(0:170*10))
+
+subset_dist + ggtitle("100000pb subset") + xlab("ExcessHet") + ylab("Counts")
+
+#Plot the outliers distribution
+outliers_dist <- ggplot(data=excesshet, aes(x=V2), title("ExcessHet outliers distribution")) +
+ geom_histogram(binwidth= 5, colour="black", fill="white") +
+  scale_y_continuous(limit=c(0,500)) +
+  scale_x_continuous(breaks=c(0:170*10))
+
+outliers_dist + ggtitle("Outliers") + xlab("ExcessHet") + ylab("Counts")
+```
+For graphic results, go to (c:Users/loren/Documents/R)
