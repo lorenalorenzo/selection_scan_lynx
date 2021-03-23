@@ -88,7 +88,7 @@ library(ggplot2)
 excesshet <- read.table ("excesshet_toR.vcf")
 
 #Plot the subset distribution
-subset_dist <- ggplot(data=excesshet, aes(x=V2), title("ExcessHet outliers distribution")) +
+subset_dist <- ggplot(data=excesshet, aes(x=V2)) +
   geom_histogram(binwidth= 5, colour="black", fill="white") +
   scale_y_continuous(limit=c(0,70000)) +
   scale_x_continuous(breaks=c(0:170*10))
@@ -96,11 +96,23 @@ subset_dist <- ggplot(data=excesshet, aes(x=V2), title("ExcessHet outliers distr
 subset_dist + ggtitle("100000pb subset") + xlab("ExcessHet") + ylab("Counts")
 
 #Plot the outliers distribution
-outliers_dist <- ggplot(data=excesshet, aes(x=V2), title("ExcessHet outliers distribution")) +
+outliers_dist <- ggplot(data=excesshet, aes(x=V2)) +
  geom_histogram(binwidth= 5, colour="black", fill="white") +
   scale_y_continuous(limit=c(0,500)) +
   scale_x_continuous(breaks=c(0:170*10))
 
 outliers_dist + ggtitle("Outliers") + xlab("ExcessHet") + ylab("Counts")
+```
+
+Then, I decided to filter every ExcessHet value over 13 (p-value>0.05) and again look at the distribplot
+```
+#Plot values <13
+selected_excesshet <- subset(excesshet, V2<13) #98958 of values selected (~99%)
+selected_dist <- ggplot(data=selected_excesshet, aes(x=V2)) +
+  geom_histogram(binwidth= 3, colour="black", fill="white") +
+  scale_y_continuous(limit=c(0,70000)) +
+  scale_x_continuous(breaks=c(0:170))
+
+selected_dist + ggtitle("99%") + xlab("ExcessHet") + ylab("Counts")
 ```
 For graphic results, go to (c:Users/loren/Documents/R)
