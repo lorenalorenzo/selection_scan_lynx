@@ -15,7 +15,6 @@ The script applying filters 1 through 5, which are independent of species and se
 grep -v "#" allsamples_cat_ref.filter5.vcf | wc -l
 22940737
 ````
-
 ## (6) Under-represented, excessively missing variants
 It's important to filter out variants which are missing completely in one or more species.
 {UNDER CONSTRUCTION}
@@ -25,6 +24,8 @@ The number of het genotypes expected under Hardy-Weinberg equilibrium is 2*(# of
 
 ## (7) Inbreeding coefficient
 The output is the inbreeding coefficient 'F' (fixation) statistic, which for large sample sizes converges to the probability that an individual's two alleles are identical by descent, provided that cosanguinity is the only source of deviation from Hardy-Weinberg equilibrium.
+
+**WORK HEREAFTER UNUSABLE ONCE VCF IS DIVIDED PER SPECIES**
 
 ## (8) Excess Het
 ExcessHet describes the heterozygosity of the called samples, giving a probability of excess heterozygosity being observed. To analyze this, we first need to separate the vcf per species.
@@ -116,3 +117,6 @@ selected_dist <- ggplot(data=selected_excesshet, aes(x=V2)) +
 selected_dist + ggtitle("99%") + xlab("ExcessHet") + ylab("Counts")
 ```
 For graphic results, go to (c:Users/loren/Documents/R)
+
+## FILTERING BY HET>80% samples
+bcftools query -f '%GT' lc_output_per_species.VCF | head -3

@@ -33,4 +33,4 @@ lc_excesshet <- read.table ("lc_excesshet_toR.vcf")
 setdiff(allsamples_excesshet, lc_excesshet)
 ```
 NO DIFFERENCE!!
-**PROBLEM: By this method, ExcessHet is not recalculated by species!!**
+**PROBLEM: By this method, ExcessHet is not recalculated by species (nor Inbreeeding Coeff)!!**
