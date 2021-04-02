@@ -119,4 +119,6 @@ selected_dist + ggtitle("99%") + xlab("ExcessHet") + ylab("Counts")
 For graphic results, go to (c:Users/loren/Documents/R)
 
 ## FILTERING BY HET>80% samples
-bcftools query -f '%GT' lc_output_per_species.VCF | head -3
+First we want to extract genotype info per sample in each species.
+bcftools query -f '%CHROM %POS  GTs:[ %GT]\t PLs:[ %PL]\n' lc_output_per_species.vcf > lc_genotypes
+bcftools query -f '%CHROM %POS  GTs:[ %GT]\t PLs:[ %PL]\n' ll_output_per_species.vcf > ll_genotypes
