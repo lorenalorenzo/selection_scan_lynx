@@ -13,6 +13,16 @@ To generate the random regions file I will use BEDtools random. I'll then remove
 # Create a Genome region file for Bedtools:
 # A file with the list of chromosomes as col1 and their length as col2, tab separated
 # Basically the first two columns of a FAI file:
+Using an fai index file in conjunction with a FASTA/FASTQ file containing reference sequences enables efficient access to arbitrary regions within those reference sequences. The index file typically has the same filename as the corresponding FASTA/FASTQ file, with .fai appended.
+An fai index file is a text file consisting of lines each with five TAB-delimited columns for a FASTA file and six for FASTQ:
+
+NAME	Name of this reference sequence
+LENGTH	Total length of this reference sequence, in bases
+OFFSET	Offset in the FASTA/FASTQ file of this sequence's first base
+LINEBASES	The number of bases on each line
+LINEWIDTH	The number of bytes in each line, including the newline
+QUALOFFSET	Offset of sequence's first quality within the FASTQ file
+
 cut -f1,2 $LUSTRE/test/Felis_catus_Ref/Felis_catus.Felis_catus_9.0.dna.toplevel.fa.fai > \
 $LUSTRE/test/Felis_catus_Ref/Felis_catus.Felis_catus_9.0.dna.toplevel.genome
 
