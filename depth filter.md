@@ -23,16 +23,14 @@ LINEBASES	The number of bases on each line
 LINEWIDTH	The number of bytes in each line, including the newline
 QUALOFFSET	Offset of sequence's first quality within the FASTQ file
 
-cut -f1,2 $LUSTRE/test/Felis_catus_Ref/Felis_catus.Felis_catus_9.0.dna.toplevel.fa.fai > \
-$LUSTRE/test/Felis_catus_Ref/Felis_catus.Felis_catus_9.0.dna.toplevel.genome
+cut -f1,2 /GRUPOS/grupolince/reference_genomes/felis_catus_genome/Felis_catus.Felis_catus_9.0.dna.toplevel.fa.fai > /home/llorenzo/depth_filter/Felis_catus_9.0.dna.toplevel.genome
 
 # Bedtools random to generate file of 100 random segments of 100000 bp
 # Output a BED file:
-bedtools random -l 100000 -n 100 -g $LUSTRE/test/Felis_catus_Ref/Felis_catus.Felis_catus_9.0.dna.toplevel.genome | \
-sort > $LUSTRE/test/FilterTrials/Felis_catus.100x100kbp.genome.bed
+bedtools random -l 100000 -n 100 -g /home/llorenzo/depth_filter/Felis_catus_9.0.dna.toplevel.genome | sort > /home/llorenzo/depth_filter/Felis_catus.100x100kbp.genome.bed
 
 # Using bedtools subtract I can remove low-mappability and repetitive regions:
-bedtools subtract -a $LUSTRE/test/FilterTrials/Felis_catus.100x100kbp.genome.bed -b $LUSTRE/test/CatGenome_Masked_BEDs/Masked_Regions.bed > $LUSTRE/test/FilterTrials/Felis_catus.100x100kbp.masked.genome.bed
+bedtools subtract -a /home/llorenzo/depth_filter/Felis_catus.100x100kbp.genome.bed -b /GRUPOS/grupolince/reference_genomes/felis_catus_genome/Masked_Regions.bed > /home/llorenzo/depth_filter/Felis_catus.100x100kbp.masked.genome.bed
 ```
 
 Then, I have to calculate region coverage per sample with samtools depth (loop to do this in every sample)
