@@ -1,3 +1,0 @@
-In callable_regions Enrico used bedtools genomecov:
-bedtools genomecov computes histograms (default), per-base reports (-d) and BEDGRAPH (-bg) summaries of feature coverage (e.g., aligned sequences) for a given genome
- .

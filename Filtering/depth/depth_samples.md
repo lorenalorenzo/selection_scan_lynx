@@ -51,7 +51,11 @@ Now that I have access to CESGA, I will repeat the previous step for the rest of
 ```
 scp Felis_catus.100x100kbp.masked.genome.bed csbiellf@ft2.cesga.es:/home/csic/bie/llf
 ```
-Then I will have to run the previous code in an .sh format (See samtools_depth.sh)
+Then I will have to run the previous code in an .sh format (See samtools_depth.sh). Upload the sh in the CESGA server:
 ```
 scp /Users/lorenalorenzo/github/selection_scan_lynx/Filtering/depth/executables/samtools_depth.sh csbiellf@ft2.cesga.es:/home/csic/bie/llf
+```
+and run it:
+```
+sbatch samtool_depth.sh
 ```
