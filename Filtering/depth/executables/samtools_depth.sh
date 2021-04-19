@@ -1,6 +1,32 @@
-module load Samtools
+#!/bin/bash
+#SBATCH -t 16:00:00
+#SBATCH -c 24
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=TIME_LIMIT_80
+#SBATCH --mail-user=lorena.lorenzo.fdez@gmail.com
 
-# Loop of Samtools depth calculations for each sample_bam (only for lp)
+#############################################################
+START=$(date)
+echo "Samtools depth SCRIPT for $1 starting : $START"
+#############################################################
+
+#############################
+## Samtools Depth launcher ##
+#############################
+
+# With this script I want to calculate depth at each position of various bamlist files
+# using samtools depth. Depth at all positions will be calculated (-a) within the
+# regions randomly selected before (-b) (see 2.Variant_Filtering.md for more detail).
+# This will be run in a loop for all bamlists
+
+module load samtools
+
+#####################################
+## Calculating Depth with SAMtools ##
+#####################################
+
+# Loop of Samtools depth calculations for each sample_bam
 for i in *cat_ref_sorted_rg_rmdup_sorted_indelrealigner.bam
   do
   echo "Calculating depth for $i"
@@ -9,5 +35,7 @@ for i in *cat_ref_sorted_rg_rmdup_sorted_indelrealigner.bam
   > /home/csic/bie/llf/"$i".100x100kbp.masked.depth
 done
 
-wd of BAM data: /mnt/netapp1/Store_csebdjgl/lynx_genome/lynx_data/CatRef_bams
--sbatch!!
+###########################################################
+END=$(date)
+echo "Samtools depth SCRIPT for $1 ended : $END"
+###########################################################
