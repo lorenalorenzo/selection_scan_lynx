@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -t 16:00:00
-#SBATCH -c 24
+#SBATCH -c 1
 #SBATCH --mail-type=BEGIN
 #SBATCH --mail-type=END
 #SBATCH --mail-type=TIME_LIMIT_80
