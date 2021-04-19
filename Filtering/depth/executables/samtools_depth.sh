@@ -29,10 +29,11 @@ module load samtools
 # Loop of Samtools depth calculations for each sample_bam
 for i in /mnt/netapp1/Store_csebdjgl/lynx_genome/lynx_data/CatRef_bams/*cat_ref_sorted_rg_rmdup_sorted_indelrealigner.bam
   do
-  echo "Calculating depth for $i"
+  sample=($(echo $i | rev | cut -d '/' -f 1 | rev | cut -d '_' -f 1-4))
+  echo "Calculating depth for $sample"
   samtools depth -a -b /home/csic/bie/llf/Felis_catus.100x100kbp.masked.genome.bed \
   "$i" \
-  > /home/csic/bie/llf/"$i".100x100kbp.masked.depth
+  > $LUSTRE/"$sample".100x100kbp.masked.depth
 done
 
 ###########################################################
