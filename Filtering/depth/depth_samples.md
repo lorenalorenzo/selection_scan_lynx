@@ -59,3 +59,34 @@ and run it:
 ```
 sbatch samtool_depth.sh
 ```
+In this way, I estimated 16h to do this work (obviously not enough), so only lc samples are calculated (except one: c_lc_zz_0003)
+As doing the loop in every sample will be high time consuming (more than 3 days), I will loop the sbatch for every sample, in other words, send 81 individual works (as we have 81 samples) to the server.
+Copy the new sh from the laptop to the server:
+```
+scp /Users/lorenalorenzo/github/selection_scan_lynx/Filtering/depth/executables/samtools_depth_per_sample.sh csbiellf@ft2.cesga.es:/home/csic/bie/llf
+```
+Nevertheless, as lp samples are already calculated and lc as well (except the one mentioned above), I do not calculate on this samples to make the process faster and do not duplicate results. So, from 81 we pass to 81-11lp-18lc=52 samples(lr,ll and one lc). The lc sample will be send alone as it is difficult for me to include in the list of $sample. In adittion, "c_ll_ca_0249" and "c_ll_ca_0253" are bad samples which are not counted in the total samples (so, 81 samples without the bad ones, remaining 52 samples).
+
+So, for the rest:
+
+```
+sample=($(ls $STORE2/lynx_genome/lynx_data/CatRef_bams/*cat_ref_sorted_rg_rmdup_sorted_indelrealigner.bam \
+| grep -v "lp" | grep -v "lc" | rev | cut -d '/' -f 1 | rev | cut -d '_' -f 1-4))
+
+for i in ${sample[@]}
+do
+echo "Calculating depth for $i"
+sbatch samtools_depth_per_sample.sh $i
+done
+```
+And for c_lc_zz_0003:
+```
+lcsample=($(ls $STORE2/lynx_genome/lynx_data/CatRef_bams/c_lc_zz_0003*cat_ref_sorted_rg_rmdup_sorted_indelrealigner.bam \
+| rev | cut -d '/' -f 1 | rev | cut -d '_' -f 1-4))
+
+for i in ${lcsample}
+do
+echo "Calculating depth for $i"
+sbatch samtools_depth_per_sample.sh $lcsample
+done
+```

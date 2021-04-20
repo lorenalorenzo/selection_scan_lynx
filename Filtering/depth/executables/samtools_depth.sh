@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -t 16:00:00
+#SBATCH -t 3-10:00:00
 #SBATCH -c 1
 #SBATCH --mail-type=BEGIN
 #SBATCH --mail-type=END
@@ -11,14 +11,14 @@ START=$(date)
 echo "Samtools depth SCRIPT for $1 starting : $START"
 #############################################################
 
-#############################
-## Samtools Depth launcher ##
-#############################
+############################################
+## Samtools Depth launcher (samtools/1.10)##
+############################################
 
-# With this script I want to calculate depth at each position of various bamlist files
+# With this script I want to calculate depth at each position of every sample_bam (81)
 # using samtools depth. Depth at all positions will be calculated (-a) within the
-# regions randomly selected before (-b) (see 2.Variant_Filtering.md for more detail).
-# This will be run in a loop for all bamlists
+# regions randomly selected before (-b) (see depth_filtering.md for more detail).
+# This will be run in a loop for each sample_bam
 
 module load samtools
 
@@ -27,7 +27,7 @@ module load samtools
 #####################################
 
 # Loop of Samtools depth calculations for each sample_bam
-for i in /mnt/netapp1/Store_csebdjgl/lynx_genome/lynx_data/CatRef_bams/*cat_ref_sorted_rg_rmdup_sorted_indelrealigner.bam
+for i in $STORE2/lynx_genome/lynx_data/CatRef_bams/*cat_ref_sorted_rg_rmdup_sorted_indelrealigner.bam
   do
   sample=($(echo $i | rev | cut -d '/' -f 1 | rev | cut -d '_' -f 1-4))
   echo "Calculating depth for $sample"
