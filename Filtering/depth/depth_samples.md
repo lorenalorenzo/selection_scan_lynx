@@ -46,6 +46,9 @@ With this, I will analyze coverage distribution (average, stdv, maxDepth, minDep
 scp llorenzo@genomics-a.ebd.csic.es:/home/llorenzo/depth_filter/*masked.depth .
 ```
 
+
+## Once I had access to CESGA, REST OF THE SPECIES
+
 Now that I have access to CESGA, I will repeat the previous step for the rest of lynx species. The first thing I have to do is copy Felis_catus.100x100kbp.masked.genome.bed to CESGA (from my laptop)
 
 ```
@@ -89,4 +92,8 @@ do
 echo "Calculating depth for $i"
 sbatch samtools_depth_per_sample.sh $lcsample
 done
+```
+Download results in my laptop for R analyses:
+```
+scp -r csbiellf@ft2.cesga.es:/mnt/lustre/scratch/home/csic/bie/llf .
 ```

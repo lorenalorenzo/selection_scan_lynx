@@ -3,6 +3,37 @@ Title: Applying depth filter to VCF
 Author: Lorena Lorenzo Fernández
 Date: 19 April 2021
 ---
+##Sample bed depth at each window in the genome
+With bedtools genomecov we are calculating coverage per window in each sample, in order to laterly filter
+```
+sample=($(ls $STORE2/lynx_genome/lynx_data/CatRef_bams/*cat_ref_sorted_rg_rmdup_sorted_indelrealigner.bam \
+| rev | cut -d '/' -f 1 | rev | cut -d '_' -f 1-4))
+
+for i in ${sample[@]}
+do
+echo "BED for $i"
+sbatch BED_coverage.sh $i
+done
+```
+Then I will have to run the previous code in an .sh format (See samtools_depth.sh). Upload the sh in the CESGA server:
+```
+scp /Users/lorenalorenzo/github/selection_scan_lynx/Filtering/depth/executables/BED_coverage.sh csbiellf@ft2.cesga.es:/home/csic/bie/llf
+```
+
+
+**NO REVISADO**
+
+# To run the script I just need to give it the sample path, in a loop:
+samplearray=(contemporary_data/c_ll_vl_0112 contemporary_data/c_ll_ya_0146 contemporary_data/c_lp_sm_0138 contemporary_data/c_lp_sm_0140 c_lc_zz_0001 c_lc_zz_0003 c_lr_zz_0001 c_lr_nm_0006)
+
+for sample in ${samplearray[@]}
+ do
+  samplename=($(echo "${sample}" | rev | cut -d "/" -f1 | rev | cut -d'_' -f1-4))
+  echo "${samplename}"
+  screen -dmS callable_${samplename}  sh -c "/home/ebazzicalupo/callregions.sh /GRUPOS/grupolince/CatRef_bams/${sample}; exec /bin/bash"
+done
+
+# Recalculate the limits based on individual distributions of the samples I want to use:
 
 # Now to assign "not-callable" status to <MinDepth and >MaxDepth regions
 
