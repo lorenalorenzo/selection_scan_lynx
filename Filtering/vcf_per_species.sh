@@ -18,3 +18,16 @@ for sp in ${spARRAY[@]}
   $(for j in ${samplesARRAY[@]}; do echo "-sn ${j}";done) \
   -O ${sp}_output_per_species.vcf
   done
+
+REVISAR ESTO, LO QUE YO HE HECHO ES LO DE ARRIBA, AHORA TENGO QUE ADAPTARLO
+
+  for i in lc ll lp lr
+   do
+    echo ${i}
+    samples=($(ls $LUSTRE/samples_subset_depth/*masked.depth |rev | cut -d '/' -f 1 | grep "${i}" | rev | cut -d '.' -f 1)))
+    /opt/gatk-4.1.0.0/gatk SelectVariants \
+    -R /GRUPOS/grupolince/reference_genomes/felis_catus_genome/Felis_catus.Felis_catus_9.0.dna.toplevel.fa \
+    -V allsamples_cat_ref.filter5.vcf \
+    $(for j in ${samplesARRAY[@]}; do echo "-sn ${j}";done) \
+    -O ${sp}_output_per_species.vcf
+    done
