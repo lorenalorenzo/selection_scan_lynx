@@ -1,0 +1,324 @@
+---
+title: "saltiLASSI-Positive selection genomic scan on lynxes"
+author: "Lorena Lorenzo"
+date: "`r format(Sys.time(), '%d-%b-%Y')`"
+output:
+  github_document:
+---
+
+```{r global-options, include=FALSE}
+knitr::opts_chunk$set(fig.path='figs/' , warning=FALSE, message=FALSE)
+```
+
+## SaltiLASSI results
+In the graph, dashed, dotted and solid line corresponds to the top 300, 400 and 500 windows as outliers, respectively. The rest of the analyses has been done with 500 windows as outliers.
+
+```{r echo=FALSE}
+#install.packages
+library(tidyverse)
+library(rehh)
+library(RColorBrewer)
+library(cowplot)
+library(ggpubr)
+library(grid)
+library(ggrepel)
+
+#Set directories
+path<- "/Users/lorenalorenzo/selection_scan_lynx"
+files<- "/files/"
+plots<- "/plots/"
+
+#Name the variables
+species<- c("lc", "ll", "lp", "lr")
+
+names <- c("lc" = "Lynx canadensis",
+            "lr" = "Lynx rufus",
+            "ll" = "Lynx lynx",
+            "lp" = "Lynx pardinus")
+
+chr <- c( "A1", "A2", "A3", "B1", "B2", "B3", "B4", "C1", "C2", "D1", "D2", "D3", "D4", "E1", "E2", "E3", "F1", "F2")
+
+colors <- c("lr"= "#FFB3B5",
+            "lp"= "#BBCF85",
+            "ll"="#61D8D6",
+            "lc"="#D4BBFC")
+
+#set X axis with chr_size dataframe (for plotting)
+    axis_set <- read.table(paste0(path, files, "chr_size.txt"), sep="\t", col.names=c("chr", "size")) %>%
+                 mutate(center = size/2)
+    #Group by chr
+    data_axis <- axis_set %>%
+                  mutate(size_cum = lag(cumsum(as.numeric(size)), default = 0)) %>%
+                  rowwise() %>%
+                  mutate(center_cum = sum(center, size_cum))     
+```
+
+```{r echo=FALSE, message=FALSE, fig.height = 20, fig.width = 15}
+for (sp in species)
+{
+# saltiLASSI results -----------------------------------------------------------
+
+  #Read data
+  lassi_scan<- read.table(paste0(path, files, sp, "_salti.lassip.hap.out"), sep="\t", header=T)
+  
+  #Group by chr
+  data_cum <- lassi_scan %>% 
+    group_by(chr) %>% 
+    summarise(max_bp = max(pos)) %>%
+    mutate(bp_add = lag(cumsum(max_bp), default = 0)) %>% 
+    dplyr::select(chr, bp_add)
+  
+  data_lassi <- lassi_scan %>% 
+    inner_join(data_cum, by = "chr") %>% 
+    mutate(bp_cum = pos + bp_add) %>%
+    mutate(dataset="saltiLASSI")
+
+  #Change the "sp_L" column name to another in order to make it easier to manage
+  colnames(data_lassi)[12]<- "statistic"
+  
+  #Explore statistic distribution
+  dist_plot<- ggplot(data_lassi, aes(x= statistic)) +
+         geom_density() + 
+         labs (title=sp) +
+        theme_minimal() +
+        ggtitle (as.character(names[sp]))
+  
+  assign(paste0(sp, "_dist_plot"), dist_plot)
+
+  ## define outliers ---------------------------------------------------------
+  #try with a common threshold
+  top_300_threshold <- sort(data_lassi$statistic, decreasing = TRUE)[300]
+  top_400_threshold <- sort(data_lassi$statistic, decreasing = TRUE)[400]
+  top_500_threshold <- sort(data_lassi$statistic, decreasing = TRUE)[500]
+  
+  lassi_300outliers<- data_lassi %>% filter(statistic >= top_300_threshold)
+  lassi_400outliers<- data_lassi %>% filter(statistic >= top_400_threshold)
+  lassi_500outliers<- data_lassi %>% filter(statistic >= top_500_threshold)
+  
+  write.table(lassi_300outliers, file=(paste0(path, files, sp, "_lassi_300outliers")), sep="\t", row.names = FALSE, quote = FALSE)
+  write.table(lassi_400outliers, file=(paste0(path, files, sp, "_lassi_400outliers")), sep="\t", row.names = FALSE, quote = FALSE)
+  write.table(lassi_500outliers, file=(paste0(path, files, sp, "_lassi_500outliers")), sep="\t", row.names = FALSE, quote = FALSE)
+   
+  bed_300 <- lassi_300outliers  %>% dplyr::select(c(1,2,3,12))
+  bed_400 <- lassi_400outliers  %>% dplyr::select(c(1,2,3,12))
+  bed_500 <- lassi_500outliers  %>% dplyr::select(c(1,2,3,12))
+  
+  write.table(bed_300, file=(paste0(path, files, sp, "_lassi_300outliers.bed")), sep="\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+  write.table(bed_400, file=(paste0(path, files, sp, "_lassi_400outliers.bed")), sep="\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+  write.table(bed_500, file=(paste0(path, files, sp, "_lassi_500outliers.bed")), sep="\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+  
+  #plot results
+  q<- ggplot() +
+         geom_point(data_lassi, mapping=aes(x = bp_cum, y = statistic, 
+                                            alpha = 0.5, color =   as_factor(chr))) +   
+         geom_hline(yintercept= top_300_threshold, color="black", 
+                    linetype="dashed", show.legend = TRUE) +
+          geom_hline(yintercept= top_400_threshold, color="black", 
+                     linetype="dotted", show.legend = TRUE) +
+          geom_hline(yintercept= top_500_threshold, color="black", 
+                     linetype="solid", show.legend = TRUE) +
+         scale_x_continuous(label = data_axis$chr, breaks = data_axis$center_cum) +
+         ylab ("Λ") +
+         theme_minimal() +
+         theme(axis.title.x = element_blank(), legend.position = "none") +
+        scale_color_manual(values=rep(c(as.character(colors[sp]), "#C5C6D0"),18))
+  
+  
+  r <- annotate_figure(q,bottom = text_grob(as.character(names[sp]), face = "italic", size = 20,   family= "Helvetica"),left = text_grob("Statistic value", color = "grey", rot = 90))
+  
+  assign(paste0(sp, "_plot"), r )
+  }  
+## customize
+s<- ggarrange(lc_plot, ll_plot, lp_plot, lr_plot, 
+     ncol= 1, nrow= 4,
+     common.legend= TRUE,
+       legend="bottom")  
+
+print(s)
+
+t<- ggarrange (lc_dist_plot, ll_dist_plot, lp_dist_plot, lr_dist_plot,
+              ncol= 1, nrow= 4,
+              common.legend= TRUE,
+              legend="bottom") 
+
+print(t)
+
+ggsave(filename = paste0(path, plots, "lassi_selection.png"), plot= s, width= 25, height = 20)
+
+```
+
+## Candidate regions and genes
+
+```{bash eval=FALSE}
+module load bedtools
+
+species=(lc ll lp lr)
+
+for sp in ${species[@]}
+  do
+    echo "$sp"
+       #merge every overlapping outlier window in LASSI 
+       bedtools merge \
+       -i ${sp}_lassi_500outliers.bed \
+       -c 1 \
+       -o count \
+       > ${sp}_merged_tmp
+       echo "$sp merged"
+       
+       #print a header (column names)
+       echo -e "chr start end windows" | cat - ${sp}_merged_tmp | tr " " "\t" > ${sp}_candidate_regions
+  
+      #Extend candidate regions up and downstream 20kbp
+      bedtools slop \
+        -i  ${sp}_merged_tmp \
+        -g chr_size.txt \
+        -b 20000 \
+        > ${sp}_extended_20kbp_tmp
+        
+      #print a header (column names)
+       echo -e "chr start end windows" | cat - ${sp}_extended_20kbp_tmp | tr " " "\t" \
+       > ${sp}_candidate_regions_extended_20kbp
+       
+  done  
+  
+  
+  #Cross with annotation    
+  for sp in ${species[@]}
+  do    
+     ###without extension 
+        #1. Intersect with annotation file     
+        bedtools intersect \
+             -a ${sp}_candidate_regions \
+             -b Felis_catus.Felis_catus_9.0.97.gff3 \
+             -wa -wb \
+             > ${sp}_candidate_regions_annotated 
+            echo "$sp annotated"
+        
+        #2. Get only genes
+          awk '$7=="gene"' ${sp}_candidate_regions_annotated  > ${sp}_genes_tmp
+          echo "$sp genes"
+        
+        #3. Filter for interesting colums
+           cut -f-1,2,3,4,7,8,9,13- ${sp}_genes_tmp | tr ' ' '\t' | cut -d';' -f1,2 | tr ';' '\t' | \
+         awk '{if ($9 ~ /Name=[[:alnum:]]/) $9=$9; else $9="NA"; print $0}' | \
+         awk '{if ($8 ~ /^ID=gene:/) {sub(/^ID=gene:/, "", $8)} if ($9 ~ /^Name=/) {sub(/^Name=/, "", $9)} print}' \
+         > ${sp}_genes_filtered_tmp
+      
+        #4. Add a header
+          echo -e "chr start end windows type gene_start gene_end ensembl_id gene_name" | \
+          cat - ${sp}_genes_filtered_tmp > ${sp}_candidate_regions_genes
+      
+    ###with a 20kbp extension
+        #1. Intersect with annotation file     
+        bedtools intersect \
+           -a ${sp}_candidate_regions_extended_20kbp \
+           -b Felis_catus.Felis_catus_9.0.97.gff3 \
+           -wa -wb \
+           > ${sp}_candidate_regions_extended_20kbp_annotated 
+          echo "$sp annotated"
+          
+        #2. Get only genes
+          awk '$7=="gene"' ${sp}_candidate_regions_extended_20kbp_annotated   > ${sp}_genes_extend_tmp
+          echo "$sp genes" 
+      
+        #3. Filter for interesting colums
+          cut -f-1,2,3,4,7,8,9,13- ${sp}_genes_extend_tmp | tr ' ' '\t' | cut -d';' -f1,2 | tr ';' '\t' | \
+            awk '{if ($9 ~ /Name=[[:alnum:]]/) $9=$9; else $9="NA"; print $0}' | \
+            awk '{if ($8 ~ /^ID=gene:/) {sub(/^ID=gene:/, "", $8)} if ($9 ~ /^Name=/) {sub(/^Name=/, "", $9)} print}' \
+            > ${sp}_genes_extend_filtered_tmp
+      
+        #4. Add a header
+          echo -e "chr start end windows type gene_start gene_end ensembl_id gene_name" | \
+          cat - ${sp}_genes_extend_filtered_tmp > ${sp}_candidate_regions_20kbp_genes
+   
+   done 
+  
+  #remove temporal files
+  rm *tmp
+```
+
+## Enrichment analyses
+
+```{r, message= FALSE,  results = 'asis'}
+
+##Dependencies
+#BiocManager::install("biomaRt")
+library(topGO)
+library(biomaRt)
+
+#####Get annotation from ensembl.org#####
+
+#read from ensembl.org every felcat ensembl ID:
+ensembl <- useMart("ensembl", dataset = "fcatus_gene_ensembl")  
+###extract the GOterms for every ensembl_id
+##ensembl_to_go <- getBM(attributes = c("ensembl_gene_id", "external_gene_name", "go_id"), ##mart = ensembl)
+
+# Get attributes
+attributes <- c("ensembl_gene_id", "external_gene_name", "go_id", "gene_biotype")
+
+# Retrieve annotations
+ensembl_to_go <- getBM(attributes = attributes, mart = ensembl) %>%
+  filter(gene_biotype== "protein_coding")
+
+#make a list with every GO terms per ENSEMBL_ ID. 
+go_list <- split(ensembl_to_go$go_id, ensembl_to_go$ensembl_gene_id)
+
+  #comment: Without filtering for coding genes, there is a total of 29550 ensembl_id corresponding to coding genes (19588) + non-coding genes (9468) + pseudogenes (494) according to https://www.ensembl.org/Felis_catus/Info/Annotation. We are getting 19564, 24 less than reported by the assembly (don't really know why)
+
+
+for (sp in species)
+{
+
+#####read my gene data set#####  
+    df_genes<- read.table(paste0(path, files, sp, "_candidate_regions_20kbp_genes"), 
+                       sep=" ", header=T)
+    genes <- df_genes %>%
+              distinct(ensembl_id) %>%
+              pull(ensembl_id) %>%
+              as.character()  
+    #this is a character object with the ensembl_ids ("ENSFCAG00000008235" "ENSFCAG00000008236" "ENSFCAG00000029529" ...)
+    assign(paste0(sp, "_genes"), genes)
+
+#cross the felcat annotation (ensembl_id with its GOterms) with my set of genes, to get a logical factor of true (if the gene is in the set) and false (if its not)
+allgenes = factor(as.integer(names(go_list) %in% genes))
+names(allgenes) <- names(go_list) #ensure names of allgenes are names of go_list (that is, the ensembl_id)
+
+assign(paste0(sp, "_allgenes"), allgenes)
+
+#create the empty results df before the loop
+final_overrep <- data.frame()
+
+for (gocat in c("BP", "MF", "CC"))
+{
+  
+#####Creating the topGOdata object#####
+godata <- new("topGOdata", ontology = gocat, allGenes = allgenes, 
+              annotationFun = annFUN.gene2GO, gene2GO = go_list)
+
+assign(paste0(sp, gocat, "_godata"), godata)
+#####run the overrepresentation test#####
+over_test <- runTest(godata, statistic = "fisher")
+
+assign(paste0(sp, "_test"), over_test)
+
+result_table <- GenTable(godata, Fisher=over_test, topNodes=over_test@geneData[2], numChar=1000) %>% 
+        as_tibble() %>% 
+        mutate(p.adj = round(p.adjust(as.numeric(gsub("<", "", Fisher)), method="BH"), 15), ontology= gocat) %>% 
+        filter(p.adj<0.05 & Significant >1) 
+
+final_overrep  <- rbind (final_overrep, result_table ) 
+
+}
+
+write.table(final_overrep, file=(paste0(path, files, sp, "_functional_enrichment.csv")), sep =  "\t", row.names = FALSE, quote = FALSE)
+            
+assign(paste0(sp, "_results"), final_overrep ) %>% mutate(species= names[sp])
+
+}
+
+#to print in the Rmd
+knitr::kable(lc_results, caption= "Lynx canadensis")
+knitr::kable(ll_results, caption= "Lynx lynx")
+knitr::kable(lp_results, caption= "Lynx pardinus")
+knitr::kable(lr_results, caption= "Lynx rufus")
+```
